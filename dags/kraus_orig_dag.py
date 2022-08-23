@@ -21,7 +21,7 @@ with DAG(
         schedule_interval=None,
         start_date=datetime(2022, 1, 1),
         catchup=False,
-        max_active_tasks=3,
+        max_active_tasks=12,
         tags=['traficsim'],
 ) as dag:
     get_run_uuid = PythonOperator(
