@@ -36,7 +36,7 @@ with DAG(
             name=f'run_simulation_algo_{algo}_minGap_{m}_tau_{t}',
             secrets=[secret_env_auth_url, secret_env_id, secret_env_secret],
             image_pull_policy='Always',
-            namespace='default',
+            namespace='airflow',
             image='dinozavyr/traficsim:latest',
             is_delete_operator_pod=True,
             do_xcom_push=False,
