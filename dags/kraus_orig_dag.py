@@ -26,7 +26,7 @@ with DAG(
         schedule_interval=None,
         start_date=datetime(2022, 1, 1),
         catchup=False,
-        max_active_tasks=12,
+        max_active_tasks=30,
         tags=['traficsim'],
 ) as dag:
     get_run_uuid = PythonOperator(
@@ -46,7 +46,7 @@ with DAG(
             is_delete_operator_pod=True,
             do_xcom_push=False,
             cmds=["python3"],
-            arguments=["traficsim/main.py", '--uuid={{ ti.xcom_pull("get_run_uuid") }}', f"--algo={algo}", f"--minGap={m}", f"--tau={t}", f"--interval{i}"],
+            arguments=["traficsim/main.py", '--uuid={{ ti.xcom_pull("get_run_uuid") }}', f"--algo={algo}", f"--minGap={m}", f"--tau={t}", f"--interval={i}"],
             dag=dag)
         run_simulation.set_upstream(get_run_uuid)
 
