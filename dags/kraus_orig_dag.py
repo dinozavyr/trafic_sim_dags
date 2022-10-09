@@ -9,13 +9,17 @@ from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import Kubernete
 
 import uuid
 
-secret_env_auth_url = Secret('env', 'OS_AUTH_URL', 'os-creds', key='OS_AUTH_URL')
-secret_env_id = Secret('env', 'OS_APPLICATION_CREDENTIAL_ID', 'os-creds', key='OS_APPLICATION_CREDENTIAL_ID')
-secret_env_secret = Secret('env', 'OS_APPLICATION_CREDENTIAL_SECRET', 'os-creds', key='OS_APPLICATION_CREDENTIAL_SECRET')
+secret_env_endpoint_url = Secret('env', 'ENDPOINT-URL', 'minio-creds', key='ENDPOINT-URL')
+secret_env_access_key = Secret('env', 'ACCESS-KEY', 'minio-creds', key='ACCESS-KEY')
+secret_env_secret_key = Secret('env', 'SECRET-KEY', 'minio-creds', key='SECRET-KEY')
+secret_env_bucket_name = Secret('env', 'BUCKET-NAME', 'minio-creds', key='BUCKET-NAME')
 
 routingAlgorithm = ['dijkstra', 'astar', 'CH']
-minGap = [1, 1.5, 2, 2.5, 3]
-tau = [1, 1.25]
+interval = ['10','20','30','40','50']
+tau = [1,1.25]
+minGap = [1,1.5,2,2.5,3]
+
+
 
 with DAG(
         dag_id='kraus_orig_dag',
@@ -30,19 +34,19 @@ with DAG(
         python_callable=uuid.uuid4,
         dag=dag)
 
-    for algo, m, t in itertools.product(routingAlgorithm, minGap, tau):
+    for algo, m, t, i in itertools.product(routingAlgorithm, minGap, tau, interval):
 
         run_simulation = KubernetesPodOperator(
-            task_id=f'run_simulation_algo_{algo}_minGap_{m}_tau_{t}',
-            name=f'run_simulation_algo_{algo}_minGap_{m}_tau_{t}',
-            secrets=[secret_env_auth_url, secret_env_id, secret_env_secret],
+            task_id=f'run_simulation_algo={algo}_interval{i}_minGap={m}_tau={t}',
+            name=f'run_simulation_algo={algo}_interval{i}_minGap={m}_tau={t}',
+            secrets=[secret_env_endpoint_url, secret_env_access_key, secret_env_secret_key, secret_env_bucket_name],
             image_pull_policy='Always',
             namespace='airflow',
             image='dinozavyr/traficsim:latest',
             is_delete_operator_pod=True,
             do_xcom_push=False,
             cmds=["python3"],
-            arguments=["traficsim/main.py", '--uuid={{ ti.xcom_pull("get_run_uuid") }}', f"--algo={algo}", f"--minGap={m}", f"--tau={t}"],
+            arguments=["traficsim/main.py", '--uuid={{ ti.xcom_pull("get_run_uuid") }}', f"--algo={algo}", f"--minGap={m}", f"--tau={t}", f"--interval{i}"],
             dag=dag)
         run_simulation.set_upstream(get_run_uuid)
 
