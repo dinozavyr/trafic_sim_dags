@@ -37,8 +37,8 @@ with DAG(
     for algo, m, t, i in itertools.product(routingAlgorithm, minGap, tau, interval):
 
         run_simulation = KubernetesPodOperator(
-            task_id=f'run-simulation-algo={algo}-interval{i}-minGap={m}-tau={t}',
-            name=f'run-simulation-algo={algo}-interval{i}-minGap={m}-tau={t}',
+            task_id=f'run-simulation-algo={algo}interval{i}minGap{m}tau{t}',
+            name=f'run-simulation-algo{algo}interval{i}minGap{m}tau{t}',
             secrets=[secret_env_endpoint_url, secret_env_access_key, secret_env_secret_key, secret_env_bucket_name],
             image_pull_policy='Always',
             namespace='airflow',
